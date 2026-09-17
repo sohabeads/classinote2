@@ -1,0 +1,6 @@
+{
+  "name": "Assistant Scolaire",
+  "description": "Assistant scolaire intelligent pour le suivi des notes, devoirs et budget étudiant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
