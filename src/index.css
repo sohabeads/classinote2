@@ -1,9 +1,53 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap');
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Hanken Grotesk", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Custom palette declarations */
+  --color-brand-navy: #1B2A4A;
+  --color-brand-navy-light: #263A63;
+  --color-brand-navy-deep: #101B33;
+  --color-brand-yellow: #FFC107;
+  --color-brand-yellow-deep: #E3A600;
+  --color-brand-yellow-pale: #FFF3D1;
+  --color-brand-red: #C0392B;
+  --color-brand-border: #E6E9F1;
+  --color-brand-bg: #F8F9FB;
+
+  /* Overriding standard Slate to match design perfectly */
+  --color-slate-50: #F8F9FB;
+  --color-slate-100: #F8F9FB;
+  --color-slate-200: #E6E9F1;
+  --color-slate-300: #E6E9F1;
+  --color-slate-400: #8B92A5;
+  --color-slate-500: #5B6377;
+  --color-slate-600: #5B6377;
+  --color-slate-700: #1B2A4A;
+  --color-slate-800: #1B2A4A;
+  --color-slate-900: #1B2A4A;
+  --color-slate-950: #101B33;
+
+  /* Overriding blue for general consistency */
+  --color-blue-50: #FFF3D1;
+  --color-blue-100: #FFF3D1;
+  --color-blue-200: #FFC107;
+  --color-blue-300: #FFC107;
+  --color-blue-500: #FFC107;
+  --color-blue-600: #1B2A4A;
+  --color-blue-700: #263A63;
+  --color-blue-800: #101B33;
+  --color-blue-900: #101B33;
 }
 
 body {
   font-family: var(--font-sans);
+  background-color: #F8F9FB;
+  color: #1B2A4A;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
 }

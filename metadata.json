@@ -1,6 +1,6 @@
 {
   "name": "Assistant Scolaire",
-  "description": "Assistant scolaire intelligent pour le suivi des notes, devoirs et budget étudiant.",
+  "description": "Suivi intelligent de scolarité NoteUp : moyenne prédictive, devoirs synchronisés et gestion du budget.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

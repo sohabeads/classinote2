@@ -50,6 +50,7 @@ import { initialProfile, initialSubjects, initialEvaluations, initialHomeworks, 
 export default function App() {
   // Navigation: 'onboarding' | 'dashboard' | 'simulator' | 'homeworks' | 'budget' | 'add-grade' | 'add-homework' | 'add-transaction' | 'manage-subjects'
   const [activeTab, setActiveTab] = useState<'accueil' | 'simulator' | 'homeworks' | 'budget' | 'profile'>('accueil');
+  const [homeTabSub, setHomeTabSub] = useState<'notes' | 'matières'>('matières');
   const [currentScreen, setCurrentScreen] = useState<string>(() => {
     const saved = localStorage.getItem('as_onboard_completed');
     return saved === 'true' ? 'main' : 'landing';
@@ -626,7 +627,7 @@ export default function App() {
               <footer className="pt-4 flex flex-col items-center gap-3">
                 <button 
                   onClick={() => setCurrentScreen('onboarding')}
-                  className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)] active:scale-[0.98] transition-all duration-150 group cursor-pointer"
+                  className="w-full h-14 rounded-xl bg-[#FFC107] text-[#1B2A4A] hover:bg-[#E3A600] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(255,193,7,0.3)] active:scale-[0.98] transition-all duration-150 group cursor-pointer"
                   type="button"
                 >
                   <span>Prendre le contrôle (Commencer)</span>
@@ -1854,12 +1855,12 @@ export default function App() {
                     </div>
                   </section>
 
-                  {/* Matières & Notes récentes scroll lists */}
+                  {/* Matières & Notes récentes section */}
                   <section className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-slate-700" />
-                        <h3 className="text-sm font-bold text-slate-900">Matières &amp; Notes récentes</h3>
+                        <h3 className="text-sm font-bold text-slate-900">Matières &amp; Notes</h3>
                       </div>
                       <button 
                         onClick={() => setCurrentScreen('add-grade')}
@@ -1871,49 +1872,153 @@ export default function App() {
                       </button>
                     </div>
 
-                    <div className="space-y-2.5">
-                      {evaluations.slice(0, 4).map(e => {
-                        const subject = subjects.find(s => s.id === e.subjectId);
-                        return (
-                          <div 
-                            key={e.id}
-                            className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between active:scale-[0.99] transition-transform"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="material-symbols-outlined text-blue-600 bg-blue-50 p-2 rounded-xl text-xl">
-                                {subject?.icon || 'functions'}
-                              </span>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="text-xs font-bold text-slate-950">{subject?.name || 'Matière'}</h4>
-                                  <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-semibold">{e.type}</span>
-                                </div>
-                                <p className="text-[11px] text-slate-400 mt-0.5">{e.comment || 'Évaluation trimestrielle'}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <span className={`text-sm font-black ${
-                                  e.grade >= 14 ? 'text-emerald-600' : e.grade < 10 ? 'text-red-600' : 'text-slate-800'
-                                }`}>
-                                  {e.grade.toFixed(1)}
-                                </span>
-                                <span className="text-[11px] text-slate-400 font-semibold">/20</span>
-                              </div>
-
-                              <button
-                                onClick={() => deleteEvaluation(e.id)}
-                                className="text-slate-300 hover:text-red-500 p-1"
-                                type="button"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    {/* Segmented controls for homeTabSub */}
+                    <div className="flex p-1 bg-slate-100 rounded-xl gap-1 border border-slate-200">
+                      <button
+                        onClick={() => setHomeTabSub('matières')}
+                        className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          homeTabSub === 'matières' 
+                            ? 'bg-white text-slate-900 shadow-xs border border-slate-150' 
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                        type="button"
+                      >
+                        Moyennes par Matière
+                      </button>
+                      <button
+                        onClick={() => setHomeTabSub('notes')}
+                        className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          homeTabSub === 'notes' 
+                            ? 'bg-white text-slate-900 shadow-xs border border-slate-150' 
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                        type="button"
+                      >
+                        Notes récentes ({evaluations.length})
+                      </button>
                     </div>
+
+                    {/* Conditionally render based on homeTabSub */}
+                    {homeTabSub === 'matières' ? (
+                      <div className="space-y-2.5">
+                        {subjects.map(subj => {
+                          const evs = evaluations.filter(e => e.subjectId === subj.id);
+                          const avg = evs.length > 0 ? (evs.reduce((sum, e) => sum + e.grade, 0) / evs.length) : null;
+                          
+                          // Define status based on average
+                          let statusText = "Pas de note";
+                          let badgeBg = "bg-slate-100";
+                          let badgeTextColor = "text-slate-500";
+                          let borderAccent = "border-slate-100";
+                          
+                          if (avg !== null) {
+                            if (avg < 10) {
+                              statusText = "En difficulté";
+                              badgeBg = "bg-[#FFF0F0]";
+                              badgeTextColor = "text-[#C0392B]";
+                              borderAccent = "border-l-4 border-l-[#C0392B]";
+                            } else if (avg < 12) {
+                              statusText = "À consolider";
+                              badgeBg = "bg-[#FFF3D1]";
+                              badgeTextColor = "text-[#E3A600]";
+                              borderAccent = "border-l-4 border-l-[#E3A600]";
+                            } else if (avg < 14) {
+                              statusText = "Correct";
+                              badgeBg = "bg-slate-100";
+                              badgeTextColor = "text-[#1B2A4A]";
+                              borderAccent = "border-l-4 border-l-[#1B2A4A]";
+                            } else {
+                              statusText = "Excellent";
+                              badgeBg = "bg-slate-100";
+                              badgeTextColor = "text-[#1B2A4A]";
+                              borderAccent = "border-l-4 border-l-[#1B2A4A]";
+                            }
+                          }
+
+                          return (
+                            <div 
+                              key={subj.id}
+                              onClick={() => {
+                                setFormSubjectId(subj.id);
+                                setCurrentScreen('add-grade');
+                              }}
+                              className={`bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between active:scale-[0.99] transition-all hover:border-slate-300 cursor-pointer ${borderAccent}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-slate-700 bg-slate-100 p-2 rounded-xl text-xl">
+                                  {subj.icon || 'book'}
+                                </span>
+                                <div>
+                                  <h4 className="text-xs font-bold text-slate-900">{subj.name}</h4>
+                                  <p className="text-[10px] text-slate-400 mt-0.5">Coefficient: {subj.coeff} • {subj.category}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${badgeBg} ${badgeTextColor}`}>
+                                  {statusText}
+                                </span>
+                                <div className="text-right min-w-[50px]">
+                                  <span className="text-sm font-black text-slate-900">
+                                    {avg !== null ? avg.toFixed(1) : '—'}
+                                  </span>
+                                  {avg !== null && <span className="text-[10px] text-slate-400 font-semibold">/20</span>}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {evaluations.slice(0, 5).map(e => {
+                          const subject = subjects.find(s => s.id === e.subjectId);
+                          return (
+                            <div 
+                              key={e.id}
+                              className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between active:scale-[0.99] transition-transform"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-slate-700 bg-slate-100 p-2 rounded-xl text-xl">
+                                  {subject?.icon || 'functions'}
+                                </span>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="text-xs font-bold text-slate-950">{subject?.name || 'Matière'}</h4>
+                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-semibold">{e.type}</span>
+                                  </div>
+                                  <p className="text-[11px] text-slate-400 mt-0.5">{e.comment || 'Évaluation trimestrielle'}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <span className={`text-sm font-black ${
+                                    e.grade >= 14 ? 'text-[#1B2A4A]' : e.grade < 10 ? 'text-[#C0392B]' : 'text-[#E3A600]'
+                                  }`}>
+                                    {e.grade.toFixed(1)}
+                                  </span>
+                                  <span className="text-[11px] text-slate-400 font-semibold">/20</span>
+                                </div>
+
+                                <button
+                                  onClick={() => deleteEvaluation(e.id)}
+                                  className="text-slate-300 hover:text-red-500 p-1"
+                                  type="button"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {evaluations.length === 0 && (
+                          <div className="text-center py-6 text-slate-400 text-xs bg-white rounded-xl border border-dashed border-slate-200">
+                            Aucune note enregistrée. Cliquez sur "Ajouter une note" pour commencer !
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </section>
                 </main>
 
